@@ -19,6 +19,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import os
+from time import time
 
 __addon__ = xbmcaddon.Addon()
 __cwd__ = __addon__.getAddonInfo('path')
@@ -34,7 +35,11 @@ __resource__ = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'lib' ) )
 sys.path.append (__resource__)
 
 global g_jumpBackSecs
+global g_pausedTime
+global g_waitForJumpback
 g_jumpBackSecs = 0
+g_pausedTime = 0
+g_waitForJumpback = 0
 
 def log(msg):
   xbmc.log("### [%s] - %s" % (__scriptname__,msg,),level=xbmc.LOGDEBUG )
@@ -43,34 +48,35 @@ log( "[%s] - Version: %s Started" % (__scriptname__,__version__))
 
 def loadSettings():
   global g_jumpBackSecs
+  global g_waitForJumpback
   g_jumpBackSecs = int(float(__addon__.getSetting("jumpbacksecs")))
+  g_waitForJumpback = int(float(__addon__.getSetting("waitforjumpback")))
+  log('Settings loaded! JumpBackSecs: %d, WaitSecs: %d' % (g_jumpBackSecs, g_waitForJumpback))
 
 class MyPlayer( xbmc.Player ):
   def __init__( self, *args, **kwargs ):
     xbmc.Player.__init__( self )
     log('MyPlayer - init')
+    
+  def onPlayBackPaused( self ):
+    global g_pausedTime
+    g_pausedTime = time()
+    log('Paused. Time: %d' % g_pausedTime)
   
   def onPlayBackResumed( self ):
     global g_jumpBackSecs
-    if g_jumpBackSecs != 0 and xbmc.Player().isPlayingVideo() and xbmc.Player().getTime() > g_jumpBackSecs:
+    global g_pausedTime
+    global g_waitForJumpback
+    log('Resuming. Was paused for %d seconds.' % (time() - g_pausedTime))
+    if g_jumpBackSecs != 0 and xbmc.Player().isPlayingVideo() and xbmc.Player().getTime() > g_jumpBackSecs and g_pausedTime > 0 and (time() - g_pausedTime) > g_waitForJumpback:
       resumeTime = xbmc.Player().getTime() - g_jumpBackSecs
       xbmc.Player().seekTime(resumeTime)
-      log( 'resumed with %ds jumpback' % g_jumpBackSecs )
-
-#try:
-#  class MyMonitor( xbmc.Monitor ):
-#    def __init__( self, *args, **kwargs ):
-#      xbmc.Monitor.__init__( self )
-#      log('MyMonitor - init')
-#        
-#    def onSettingsChanged( self ):
-#      loadSettings()
-#
-#  xbmc_monitor = MyMonitor()
-#except:
-#  log('Using Eden API - you need to restart addon for changing settings')
+      log( 'Resumed with %ds jumpback' % g_jumpBackSecs )
+      
+    g_pausedTime = 0
+    
 player_monitor = MyPlayer()
 loadSettings()
 
 while not xbmc.abortRequested:
-      xbmc.sleep(100)
+  xbmc.sleep(100)
