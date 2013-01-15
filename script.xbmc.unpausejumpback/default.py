@@ -74,7 +74,19 @@ class MyPlayer( xbmc.Player ):
       log( 'Resumed with %ds jumpback' % g_jumpBackSecs )
       
     g_pausedTime = 0
-    
+try:
+  class MyMonitor( xbmc.Monitor ):
+    def __init__( self, *args, **kwargs ):
+      xbmc.Monitor.__init__( self )
+      log('MyMonitor - init')
+        
+    def onSettingsChanged( self ):
+      loadSettings()
+
+  xbmc_monitor = MyMonitor()
+except:
+  log('Using Eden API - you need to restart addon for changing settings')    
+
 player_monitor = MyPlayer()
 loadSettings()
 
