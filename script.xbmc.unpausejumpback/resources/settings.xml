@@ -4,4 +4,11 @@
     <setting id="jumpbacksecs" type="slider" label="Jump seconds" default="0" range="0,60" />
     <setting id="waitforjumpback" type="slider" label="Minimum pause before jumpback" default="10" range="0,600" />
   </category>
+  <category label="Jump forward/back after rwd/fwd">
+    <setting id="jumpbacksecsx2" type="slider" label="Jump after x2" default="1" range="0,60" />
+    <setting id="jumpbacksecsx4" type="slider" label="Jump after x4" default="2" range="0,60" />
+    <setting id="jumpbacksecsx8" type="slider" label="Jump after x8" default="4" range="0,60" />
+    <setting id="jumpbacksecsx16" type="slider" label="Jump after x16" default="8" range="0,60" />
+    <setting id="jumpbacksecsx32" type="slider" label="Jump after x32" default="16" range="0,60" />
+  </category>
 </settings>
