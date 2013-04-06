@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<strings>
+	<string id="10000">Jump back on unpause</string>
+	<string id="10001">Jump seconds</string>
+	<string id="10002">Minimum pause before jumpback</string>
+	<string id="20000">Jump forward/back after rwd/fwd</string>
+	<string id="20001">Jump after x2</string>
+	<string id="20002">Jump after x4</string>
+	<string id="20003">Jump after x8</string>
+	<string id="20004">Jump after x16</string>
+	<string id="20005">Jump after x32</string>
+	<string id="30000">Exclude</string>
+	<string id="30001">Exclude Live TV</string>
+	<string id="30002">Exclude HTTP sources</string>  
+	<string id="30003">Exclude path</string>
+	<string id="30004">Folder's path (and subfolders)</string>
+</strings>

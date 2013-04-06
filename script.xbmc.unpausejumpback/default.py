@@ -53,6 +53,50 @@ def log(msg):
 
 log( "[%s] - Version: %s Started" % (__scriptname__,__version__))
 
+# helper function to get string type from settings
+def getSetting(setting):
+	return __addon__.getSetting(setting).strip()
+
+# helper function to get bool type from settings
+def getSettingAsBool(setting):
+	return getSetting(setting).lower() == "true"
+
+# check exclusion settings for filename passed as argument
+def isExcluded(fullpath):
+
+	if not fullpath:
+		return True
+
+	log("isExcluded(): Checking exclusion settings for '%s'." % fullpath)
+
+	if (fullpath.find("pvr://") > -1) and getSettingAsBool('ExcludeLiveTV'):
+		log("isExcluded(): Video is playing via Live TV, which is currently set as excluded location.")
+		return True
+
+	if (fullpath.find("http://") > -1) and getSettingAsBool('ExcludeHTTP'):
+		log("isExcluded(): Video is playing via HTTP source, which is currently set as excluded location.")
+		return True
+
+	ExcludePath = getSetting('ExcludePath')
+	if ExcludePath and getSettingAsBool('ExcludePathOption'):
+		if (fullpath.find(ExcludePath) > -1):
+			log("isExcluded(): Video is playing from '%s', which is currently set as excluded path 1." % ExcludePath)
+			return True
+
+	ExcludePath2 = getSetting('ExcludePath2')
+	if ExcludePath2 and getSettingAsBool('ExcludePathOption2'):
+		if (fullpath.find(ExcludePath2) > -1):
+			log("isExcluded(): Video is playing from '%s', which is currently set as excluded path 2." % ExcludePath2)
+			return True
+
+	ExcludePath3 = getSetting('ExcludePath3')
+	if ExcludePath3 and getSettingAsBool('ExcludePathOption3'):
+		if (fullpath.find(ExcludePath3) > -1):
+			log("isExcluded(): Video is playing from '%s', which is currently set as excluded path 3." % ExcludePath3)
+			return True
+
+	return False
+
 def loadSettings():
   global g_jumpBackSecsAfterPause
   global g_waitForJumpback
@@ -116,13 +160,20 @@ class MyPlayer( xbmc.Player ):
     if g_pausedTime > 0:
       log('Resuming. Was paused for %d seconds.' % (time() - g_pausedTime))
 
-    #handle humpback after pause
-    if g_jumpBackSecsAfterPause != 0 and xbmc.Player().isPlayingVideo() and xbmc.Player().getTime() > g_jumpBackSecsAfterPause and g_pausedTime > 0 and (time() - g_pausedTime) > g_waitForJumpback:
-      resumeTime = xbmc.Player().getTime() - g_jumpBackSecsAfterPause
-      xbmc.Player().seekTime(resumeTime)
-      log( 'Resumed with %ds jumpback' % g_jumpBackSecsAfterPause )
+    # check for exclusion
+    _filename = self.getPlayingFile()
+    if isExcluded(_filename):
+      log("Ignored because '%s' is in exclusion settings." % _filename)
+      return
+
+    else:
+      #handle humpback after pause
+      if g_jumpBackSecsAfterPause != 0 and xbmc.Player().isPlayingVideo() and xbmc.Player().getTime() > g_jumpBackSecsAfterPause and g_pausedTime > 0 and (time() - g_pausedTime) > g_waitForJumpback:
+        resumeTime = xbmc.Player().getTime() - g_jumpBackSecsAfterPause
+        xbmc.Player().seekTime(resumeTime)
+        log( 'Resumed with %ds jumpback' % g_jumpBackSecsAfterPause )
       
-    g_pausedTime = 0
+      g_pausedTime = 0
 try:
   class MyMonitor( xbmc.Monitor ):
     def __init__( self, *args, **kwargs ):
@@ -141,3 +192,4 @@ loadSettings()
 
 while not xbmc.abortRequested:
   xbmc.sleep(100)
+
