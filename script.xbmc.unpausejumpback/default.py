@@ -34,16 +34,21 @@ __resource__ = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'lib' ) )
 
 sys.path.append (__resource__)
 
-global g_jumpBackSecsAfterPauseAfterPause
-global g_jumpBackSecsAfterX2
-global g_jumpBackSecsAfterX4
-global g_jumpBackSecsAfterX8
-global g_jumpBackSecsAfterX16
-global g_jumpBackSecsAfterX32
+global g_jumpBackSecsAfterFwdPauseAfterPause
+global g_jumpBackSecsAfterFwdX2
+global g_jumpBackSecsAfterFwdX4
+global g_jumpBackSecsAfterFwdX8
+global g_jumpBackSecsAfterFwdX16
+global g_jumpBackSecsAfterFwdX32
+global g_jumpBackSecsAfterRwdX2
+global g_jumpBackSecsAfterRwdX4
+global g_jumpBackSecsAfterRwdX8
+global g_jumpBackSecsAfterRwdX16
+global g_jumpBackSecsAfterRwdX32
 global g_lastPlaybackSpeed
 global g_pausedTime
 global g_waitForJumpback
-g_jumpBackSecsAfterPause = 0
+g_jumpBackSecsAfterFwdPause = 0
 g_pausedTime = 0
 g_waitForJumpback = 0
 g_lastPlaybackSpeed = 1
@@ -98,22 +103,32 @@ def isExcluded(fullpath):
 	return False
 
 def loadSettings():
-  global g_jumpBackSecsAfterPause
+  global g_jumpBackSecsAfterFwdPause
   global g_waitForJumpback
-  global g_jumpBackSecsAfterX2
-  global g_jumpBackSecsAfterX4
-  global g_jumpBackSecsAfterX8
-  global g_jumpBackSecsAfterX16
-  global g_jumpBackSecsAfterX32
+  global g_jumpBackSecsAfterFwdX2
+  global g_jumpBackSecsAfterFwdX4
+  global g_jumpBackSecsAfterFwdX8
+  global g_jumpBackSecsAfterFwdX16
+  global g_jumpBackSecsAfterFwdX32
+  global g_jumpBackSecsAfterRwdX2
+  global g_jumpBackSecsAfterRwdX4
+  global g_jumpBackSecsAfterRwdX8
+  global g_jumpBackSecsAfterRwdX16
+  global g_jumpBackSecsAfterRwdX32
 
-  g_jumpBackSecsAfterPause = int(float(__addon__.getSetting("jumpbacksecs")))
-  g_jumpBackSecsAfterX2 = int(float(__addon__.getSetting("jumpbacksecsx2")))
-  g_jumpBackSecsAfterX4 = int(float(__addon__.getSetting("jumpbacksecsx4")))
-  g_jumpBackSecsAfterX8 = int(float(__addon__.getSetting("jumpbacksecsx8")))
-  g_jumpBackSecsAfterX16 = int(float(__addon__.getSetting("jumpbacksecsx16")))
-  g_jumpBackSecsAfterX32 = int(float(__addon__.getSetting("jumpbacksecsx32")))
+  g_jumpBackSecsAfterFwdPause = int(float(__addon__.getSetting("jumpbacksecs")))
+  g_jumpBackSecsAfterFwdX2 = int(float(__addon__.getSetting("jumpbacksecsfwdx2")))
+  g_jumpBackSecsAfterFwdX4 = int(float(__addon__.getSetting("jumpbacksecsfwdx4")))
+  g_jumpBackSecsAfterFwdX8 = int(float(__addon__.getSetting("jumpbacksecsfwdx8")))
+  g_jumpBackSecsAfterFwdX16 = int(float(__addon__.getSetting("jumpbacksecsfwdx16")))
+  g_jumpBackSecsAfterFwdX32 = int(float(__addon__.getSetting("jumpbacksecsfwdx32")))
+  g_jumpBackSecsAfterRwdX2 = int(float(__addon__.getSetting("jumpbacksecsrwdx2")))
+  g_jumpBackSecsAfterRwdX4 = int(float(__addon__.getSetting("jumpbacksecsrwdx4")))
+  g_jumpBackSecsAfterRwdX8 = int(float(__addon__.getSetting("jumpbacksecsrwdx8")))
+  g_jumpBackSecsAfterRwdX16 = int(float(__addon__.getSetting("jumpbacksecsrwdx16")))
+  g_jumpBackSecsAfterRwdX32 = int(float(__addon__.getSetting("jumpbacksecsrwdx32")))
   g_waitForJumpback = int(float(__addon__.getSetting("waitforjumpback")))
-  log('Settings loaded! JumpBackSecs: %d, WaitSecs: %d' % (g_jumpBackSecsAfterPause, g_waitForJumpback))
+  log('Settings loaded! JumpBackSecs: %d, WaitSecs: %d' % (g_jumpBackSecsAfterFwdPause, g_waitForJumpback))
 
 class MyPlayer( xbmc.Player ):
   def __init__( self, *args, **kwargs ):
@@ -137,16 +152,28 @@ class MyPlayer( xbmc.Player ):
         direction = -1
         log('Resuming. Was forwarded with speed X%d.' % (abs(g_lastPlaybackSpeed)))
       #handle jumpafter fwd/rwd (humpback after fwd, jump forward after red)
-      if absLastSpeed == 2:
-        resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterX2 * direction
-      elif absLastSpeed == 4:
-        resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterX4 * direction
-      elif absLastSpeed == 8:
-        resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterX8 * direction
-      elif absLastSpeed == 16:
-        resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterX16 * direction
-      elif absLastSpeed == 32:
-        resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterX32 * direction
+      if direction == -1: #fwd
+        if absLastSpeed == 2:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterFwdX2 * direction
+        elif absLastSpeed == 4:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterFwdX4 * direction
+        elif absLastSpeed == 8:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterFwdX8 * direction
+        elif absLastSpeed == 16:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterFwdX16 * direction
+        elif absLastSpeed == 32:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterFwdX32 * direction
+      else: #rwd
+        if absLastSpeed == 2:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterRwdX2 * direction
+        elif absLastSpeed == 4:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterRwdX4 * direction
+        elif absLastSpeed == 8:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterRwdX8 * direction
+        elif absLastSpeed == 16:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterRwdX16 * direction
+        elif absLastSpeed == 32:
+          resumeTime = xbmc.Player().getTime() + g_jumpBackSecsAfterRwdX32 * direction
       
       if absLastSpeed != 1: #we really fwd'ed or rwd'ed
         xbmc.Player().seekTime(resumeTime) # do the jump
@@ -154,7 +181,7 @@ class MyPlayer( xbmc.Player ):
     g_lastPlaybackSpeed = speed
 
   def onPlayBackResumed( self ):
-    global g_jumpBackSecsAfterPause
+    global g_jumpBackSecsAfterFwdPause
     global g_pausedTime
     global g_waitForJumpback
     if g_pausedTime > 0:
@@ -168,10 +195,10 @@ class MyPlayer( xbmc.Player ):
 
     else:
       #handle humpback after pause
-      if g_jumpBackSecsAfterPause != 0 and xbmc.Player().isPlayingVideo() and xbmc.Player().getTime() > g_jumpBackSecsAfterPause and g_pausedTime > 0 and (time() - g_pausedTime) > g_waitForJumpback:
-        resumeTime = xbmc.Player().getTime() - g_jumpBackSecsAfterPause
+      if g_jumpBackSecsAfterFwdPause != 0 and xbmc.Player().isPlayingVideo() and xbmc.Player().getTime() > g_jumpBackSecsAfterFwdPause and g_pausedTime > 0 and (time() - g_pausedTime) > g_waitForJumpback:
+        resumeTime = xbmc.Player().getTime() - g_jumpBackSecsAfterFwdPause
         xbmc.Player().seekTime(resumeTime)
-        log( 'Resumed with %ds jumpback' % g_jumpBackSecsAfterPause )
+        log( 'Resumed with %ds jumpback' % g_jumpBackSecsAfterFwdPause )
       
       g_pausedTime = 0
 try:
