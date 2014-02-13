@@ -1,5 +1,5 @@
 2.3.0
-- add jumpback after playback started from non zero starting time
+- add jumpback after playback started from non zero starting time (needs gotham for working properly!)
 
 2.2.0
 - add exclude settings
